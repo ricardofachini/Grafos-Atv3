@@ -2,10 +2,13 @@
 #define GRAFO_H
 
 #include <vector>
+#include <deque>
 #include <stdint.h>
 #include <string>
 #include <iostream>
 #include <map>
+#include <tuple>
+#include "aresta.h"
 #define INFINITO INT32_MAX
 
 
@@ -13,7 +16,7 @@
 class Grafo
 {
     public:
-        Grafo(std::string arquivo);  // construtor
+        Grafo(char *nome_arquivo);  // construtor
         ~Grafo(); // destrutor
 
         // retorna numero de vertices
@@ -27,9 +30,20 @@ class Grafo
         std::vector<int> vizinhos(int vertice);
         bool haAresta(int u, int v);
         int peso(int u, int v);
+
+        // algoritmos:
+        // item 2:
+        void buscaLargura(int origem);
+
+        // item 4
+        void dijkstra(int origem);
+        int encontrarDistanciaMinima(std::vector<int>& distancia, std::vector<int>& visitados);
+
+        // item 5
+        void floyd_warshall();
     private:
-        std::vector<int> vertices;
-        std::map<std::pair<int, int>, int> arestas;
+        std::vector<std::pair<int, int>> vertices; // vetor de pares <indice, rotulo>
+        std::vector<Aresta*> arestas; // vetor de ponteiros para arestas
 
 };
 #endif
