@@ -65,6 +65,11 @@ Grafo::Grafo(char *nome_arquivo)
             }
         }
     }
+    else {
+        cerr << "erro ao abrir arquivo!\n";
+        cerr << "erro: " << strerror(errno) << endl;
+        throw(errno);
+    }
 }
 
 // destrutor
