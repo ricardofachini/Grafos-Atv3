@@ -4,27 +4,28 @@
 #include <limits>
 #include <bits/stdc++.h>
 
+using namespace std;
 
 // construtor, lê o arquivo
 Grafo::Grafo(char *nome_arquivo)
 {
-    std::ifstream arquivo; // c++ stream para leitura de arquivo
+    ifstream arquivo; // c++ stream para leitura de arquivo
     arquivo.open(nome_arquivo);
-    std::string linha;
+    string linha;
 
     // le o arquivo
     if (arquivo.is_open()) {
         bool le_vertice = false;
         bool le_aresta = false;
         while (arquivo) {
-            std::getline (arquivo, linha); // carrega uma linha do arquivo na variável linha
+            getline (arquivo, linha); // carrega uma linha do arquivo na variável linha
 
-            if (linha.find("*vertices") != std::string::npos) {  // verifica se a linha atual dita os vertices
+            if (linha.find("*vertices") != string::npos) {  // verifica se a linha atual dita os vertices
                 le_vertice = true;
                 continue;
             }
 
-            if (linha.find("*edges") != std::string::npos) { // verifica se a linha atual dita as arestas
+            if (linha.find("*edges") != string::npos) { // verifica se a linha atual dita as arestas
                 le_vertice = false;
                 le_aresta = true;
                 continue;
@@ -35,31 +36,31 @@ Grafo::Grafo(char *nome_arquivo)
 
             if (le_vertice == true) {
                 // adiciona vertice ao grafo
-                std::string s;
-                std::stringstream ss(linha);
+                string s;
+                stringstream ss(linha);
             
-                std::vector<std::string> v;
+                vector<string> v;
                 while (getline(ss, s, ' ')) {
                     v.push_back(s);
                 }
-                std::pair<int, int> vertice( std::stoi(v[0]), std::stoi(v[1]));  
+                pair<int, string> vertice( stoi(v[0]), v[1]);  
                 vertices.push_back(vertice);
             }
 
             if (le_aresta == true) {
                 // adiciona aresta ao grafo
-                std::string s;
-                std::stringstream ss(linha);
+                string s;
+                stringstream ss(linha);
             
-                std::vector<std::string> v;
+                vector<string> v;
                 while (getline(ss, s, ' ')) {
                     v.push_back(s);
                 }
-                //std::pair<int, int> aresta( linha.substr(0, 3).front()-48, linha.substr(0, 3).back()-48 );
+                //pair<int, int> aresta( linha.substr(0, 3).front()-48, linha.substr(0, 3).back()-48 );
                 Aresta *aresta = new Aresta();
-                aresta->vertice1 = std::stoi(v[0]);
-                aresta->vertice2 = std::stoi(v[1]);
-                aresta->peso = std::stoi(v[2]);
+                aresta->vertice1 = stoi(v[0]);
+                aresta->vertice2 = stoi(v[1]);
+                aresta->peso = stoi(v[2]);
                 arestas.push_back(aresta);
             }
         }
@@ -101,7 +102,7 @@ int Grafo::qtdArestas()
     return arestas.size();
 }
 
-int Grafo::rotulo(int v)
+string Grafo::rotulo(int v)
 {
     for (auto& vertice: vertices) {
         if (vertice.first == v) {
@@ -133,9 +134,9 @@ bool Grafo::haAresta(int u, int v)
 }
 
 // retorna um vetor de indices dos vertices vizinhos ao v
-std::vector<int> Grafo::vizinhos(int v)
+vector<int> Grafo::vizinhos(int v)
 {
-    std::vector<int> vizinhos;
+    vector<int> vizinhos;
     for (auto& aresta: arestas) {
         if (aresta->vertice1 == v) {
             vizinhos.push_back(aresta->vertice2);
@@ -149,20 +150,20 @@ std::vector<int> Grafo::vizinhos(int v)
 
 void Grafo::buscaLargura(int s)
 {
-    std::cout << "Algoritmo de busca em largura - DFS\n";
-    std::deque<int> fila;
-    std::vector<int> visitados;
+    cout << "Algoritmo de busca em largura - DFS\n";
+    deque<int> fila;
+    vector<int> visitados;
     int nivel = 0;
     visitados.push_back(s);
     fila.push_back(s);
-    std::cout << nivel << ": " << s << "\n";
+    cout << nivel << ": " << s << "\n";
     while (fila.size() != 0) {
-        std::vector<int> encontrados_no_nivel;
+        vector<int> encontrados_no_nivel;
         int v = fila.front();
         fila.pop_front();
         auto vizinhos_de_v = vizinhos(v);
         for (auto& vizinho: vizinhos_de_v) {
-            if ( std::find(visitados.begin(), visitados.end(), vizinho) == visitados.end() ) {
+            if ( find(visitados.begin(), visitados.end(), vizinho) == visitados.end() ) {
                 visitados.push_back(vizinho);
                 fila.push_back(vizinho);
                 encontrados_no_nivel.push_back(vizinho);
@@ -170,24 +171,24 @@ void Grafo::buscaLargura(int s)
         }
         if (encontrados_no_nivel.size() != 0) {
             nivel++;
-            std::cout << nivel << ": ";
+            cout << nivel << ": ";
         }
         for (auto& visitado: encontrados_no_nivel) {
-            std::cout << visitado << ",";
+            cout << visitado << ",";
         }
         if (encontrados_no_nivel.size() != 0) {
-            std::cout << "\n";
+            cout << "\n";
         }
         encontrados_no_nivel.clear();
     }
-    std::cout << std::endl;
+    cout << endl;
 }
 
 void Grafo::floyd_warshall()
 {
-    std::cout << "Algoritmo de floyd-warshall\n";
+    cout << "Algoritmo de floyd-warshall\n";
     int num_vertices = vertices.size();
-    std::vector<std::vector<int>> distancias(num_vertices, std::vector<int>(num_vertices, INFINITO));
+    vector<vector<int>> distancias(num_vertices, vector<int>(num_vertices, INFINITO));
 
     for (int i = 0; i < num_vertices; i++) {
         distancias[i][i] = 0;
@@ -214,30 +215,30 @@ void Grafo::floyd_warshall()
 
     // Imprimir as distâncias
     for (int i = 0; i < num_vertices; i++) {
-        std::cout << i+1 << ":";
+        cout << i+1 << ":";
         for (int j = 0; j < num_vertices; j++) {
             if (distancias[i][j] == INFINITO) {
-                std::cout << "Infinito";
+                cout << "Infinito";
             } else {
-                std::cout << distancias[i][j] << ",";
+                cout << distancias[i][j] << ",";
             }
         }
-        std::cout << std::endl;
+        cout << endl;
     }
 }
 
 void Grafo::dijkstra(int s)
 {
-    std::cout << "Algoritmo de dijkstra\n";
-    std::vector<int> visitados(vertices.size(), -1);
-    std::vector<int> distancia(vertices.size(), INFINITO);
-    std::vector<int> predecessores(vertices.size(), 0);
+    cout << "Algoritmo de dijkstra\n";
+    vector<int> visitados(vertices.size(), -1);
+    vector<int> distancia(vertices.size(), INFINITO);
+    vector<int> predecessores(vertices.size(), 0);
     distancia[s-1] = 0;
 
     for (auto& vertice: vertices) {
         int u = encontrarDistanciaMinima(distancia, visitados) + 1;
         visitados[u-1] = 1;
-        std::vector<int> vizinhos_de_u = vizinhos(u);
+        vector<int> vizinhos_de_u = vizinhos(u);
 
         // pega um vizinho de u
         for (auto& v: vizinhos_de_u) {
@@ -251,9 +252,9 @@ void Grafo::dijkstra(int s)
         }
     }
     // Imprimir os caminhos 
-    std::map<int, std::vector<int>> caminhos;
+    map<int, vector<int>> caminhos;
     for (int dest = 0; dest < vertices.size(); dest++) {
-        std::deque<int> caminho; // caminho ate o destino atual da iteração
+        deque<int> caminho; // caminho ate o destino atual da iteração
         int atual = dest;
         while (atual != -1)
         {
@@ -261,16 +262,16 @@ void Grafo::dijkstra(int s)
             int& front = (predecessores[atual]);
             atual = front-1;
         }
-        std::cout << (dest+1) << ": ";
+        cout << (dest+1) << ": ";
         for (int v: caminho) {
-            std::cout << v << ",";
+            cout << v << ",";
         }
-        std::cout << " d: " << distancia[dest] << "\n";
+        cout << " d: " << distancia[dest] << "\n";
     }
-    std::cout << std::endl;
+    cout << endl;
 }
 
-int Grafo::encontrarDistanciaMinima(std::vector<int>& distancia, std::vector<int>& visitados)
+int Grafo::encontrarDistanciaMinima(vector<int>& distancia, vector<int>& visitados)
 {
     int minimo = INFINITO;
     int indice_minimo = -1;

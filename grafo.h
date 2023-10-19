@@ -25,7 +25,7 @@ class Grafo
         int qtdArestas();
         // retorna o grau de um vertice
         int grau(int vertice);
-        int rotulo(int vertice);
+        std::string rotulo(int vertice);
 
         std::vector<int> vizinhos(int vertice);
         bool haAresta(int u, int v);
@@ -42,7 +42,7 @@ class Grafo
         // item 5
         void floyd_warshall();
     private:
-        std::vector<std::pair<int, int>> vertices; // vetor de pares <indice, rotulo>
+        std::vector<std::pair<int, std::string>> vertices; // vetor de pares <indice, rotulo>
         std::vector<Aresta*> arestas; // vetor de ponteiros para arestas
 
 };
