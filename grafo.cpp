@@ -30,6 +30,12 @@ Grafo::Grafo(char *nome_arquivo)
                 le_aresta = true;
                 continue;
             }
+            if (linha.find("*arcs") != string::npos) { // verifica se a linha atual dita os arcos
+                le_vertice = false;
+                le_aresta = true; // adicionar arco é igual adicionar aresta,
+                eh_dirigido = true; // mas na hora de usar os arcos, como retornar seu peso ou direção vai mudar
+                continue;
+            }
             if (linha == "") {
                 break;
             }
@@ -56,7 +62,6 @@ Grafo::Grafo(char *nome_arquivo)
                 while (getline(ss, s, ' ')) {
                     v.push_back(s);
                 }
-                //pair<int, int> aresta( linha.substr(0, 3).front()-48, linha.substr(0, 3).back()-48 );
                 Aresta *aresta = new Aresta();
                 aresta->vertice1 = stoi(v[0]);
                 aresta->vertice2 = stoi(v[1]);
@@ -85,10 +90,12 @@ int Grafo::peso(int u, int v)
 {
     int peso = 0;
     for (const Aresta *aresta: arestas)
-        if ((aresta->vertice1 == u && aresta->vertice2 == v) ||
-                (aresta->vertice1 == v && aresta->vertice2 == u)) {
-                    peso = aresta->peso;
-                    break;
+        if (!eh_dirigido) {
+            if ((aresta->vertice1 == u && aresta->vertice2 == v) ||
+                    (aresta->vertice1 == v && aresta->vertice2 == u)) {
+                        peso = aresta->peso;
+                        break;
+            }
         }
     if (peso == 0)  {
         return INFINITO;

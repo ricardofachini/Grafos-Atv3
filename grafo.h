@@ -42,6 +42,7 @@ class Grafo
         // item 5
         void floyd_warshall();
     private:
+        bool eh_dirigido = false;
         std::vector<std::pair<int, std::string>> vertices; // vetor de pares <indice, rotulo>
         std::vector<Aresta*> arestas; // vetor de ponteiros para arestas
 
