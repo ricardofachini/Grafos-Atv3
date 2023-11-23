@@ -1,11 +1,8 @@
 #include "grafo.h"
 
-
 int main() {
-    Grafo *grafo1 = new Grafo("fln_pequena.net"); // passar como parâmetro o arquivo de grafo
-    grafo1->buscaLargura(4); // exercicio 2: busca em largura -> origem como argumento
-    grafo1->dijkstra(2); // exercicio 4: dijkstra -> origem como argumento
-    grafo1->floyd_warshall(); // exercicio 5: floyd-warshall
+    Grafo *grafo1 = new Grafo("fluxo.net"); // passar como parâmetro o arquivo de grafo
+    grafo1->edmonds_karp(1, 2); // colocar a origem e sorvedouro como parâmetros aqui
     delete grafo1;
     return 0;
 }

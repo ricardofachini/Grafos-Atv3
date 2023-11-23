@@ -1,6 +1,7 @@
 #include "grafo.h"
 #include <fstream>
 #include <algorithm>
+#include <iostream>
 #include <limits>
 #include <bits/stdc++.h>
 
@@ -89,7 +90,7 @@ Grafo::~Grafo() {
 int Grafo::peso(int u, int v)
 {
     int peso = 0;
-    for (const Aresta *aresta: arestas)
+    for (const Aresta *aresta: arestas) {
         if (!eh_dirigido) {
             if ((aresta->vertice1 == u && aresta->vertice2 == v) ||
                     (aresta->vertice1 == v && aresta->vertice2 == u)) {
@@ -97,6 +98,11 @@ int Grafo::peso(int u, int v)
                         break;
             }
         }
+        if (aresta->vertice1 == u && aresta->vertice2 == v) {
+            peso = aresta->peso;
+            break;
+        }
+    }
     if (peso == 0)  {
         return INFINITO;
     } else {
@@ -166,8 +172,8 @@ void Grafo::buscaLargura(int s)
     deque<int> fila;
     vector<int> visitados;
     int nivel = 0;
-    visitados.push_back(s);
-    fila.push_back(s);
+    visitados.push_back(s); // C
+    fila.push_back(s); // Q
     cout << nivel << ": " << s << "\n";
     while (fila.size() != 0) {
         vector<int> encontrados_no_nivel;
@@ -295,4 +301,49 @@ int Grafo::encontrarDistanciaMinima(vector<int>& distancia, vector<int>& visitad
         }
     }
     return indice_minimo;
+}
+
+
+void Grafo::edmonds_karp(int s, int t, Grafo rede_residual) {
+    //s: source/origem
+    //t: sorvedouro ou sink
+    cout << "-- Algoritmo de Edmonds Karp --\n";
+    deque<int> fila; // C
+    vector<int> visitados; // Q
+    vector<int> predecessores(vertices.size(), 0); // A
+    int fluxo = 0;
+    visitados.push_back(s);
+    fila.push_back(s);
+
+    while (!fila.empty()) {
+        //fila nao vazia
+        int u = fila.front();
+        fila.pop_front();
+
+        auto vizinhos_de_u = vizinhos(u);
+        for (auto& v: vizinhos_de_u) {
+            if ((find(visitados.begin(), visitados.end(), v) == visitados.end()) && (rede_residual.peso(u, v) > 0)) {
+                visitados.push_back(v);
+                predecessores[v-1] = u;
+
+                // encontrar o sink
+                if (v == t) {
+                    int capacidadeAumentante = numeric_limits<int>::max();
+                    deque<int> p{t}; // caminho aumentante
+                    int w = t;
+
+                    while (w != s) {
+                        w = predecessores[w-1];
+                        capacidadeAumentante = min(capacidadeAumentante, rede_residual.peso(u, w));
+                        p.push_front(w);
+                    }
+                    fluxo += capacidadeAumentante;
+                    break;
+                }
+                fila.push_back(v);
+            }
+        }
+    }
+    cout << "fluxo maximo: " << fluxo << endl;
+
 }

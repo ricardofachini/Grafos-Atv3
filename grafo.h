@@ -41,6 +41,17 @@ class Grafo
 
         // item 5
         void floyd_warshall();
+
+
+        // ATIVIDADE 3:
+        // item 1
+        void edmonds_karp(int s, int t, Grafo rede_residual);
+
+        // item 2
+        void hopcroft_karp();
+
+        // item 3
+        void coloracao();
     private:
         bool eh_dirigido = false;
         std::vector<std::pair<int, std::string>> vertices; // vetor de pares <indice, rotulo>
