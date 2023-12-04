@@ -81,7 +81,7 @@ Grafo::Grafo(char *nome_arquivo)
 // destrutor
 Grafo::~Grafo() {
     // desaloca memória das arestas
-    for (auto& aresta: arestas) {
+    for (auto aresta: arestas) {
         delete aresta;
     }
 }
@@ -166,148 +166,44 @@ vector<int> Grafo::vizinhos(int v)
     return vizinhos;
 }
 
-void Grafo::buscaLargura(int s)
+
+void Grafo::item_1(int fonte, int sorvedouro)
 {
-    cout << "Algoritmo de busca em largura - DFS\n";
-    deque<int> fila;
-    vector<int> visitados;
-    int nivel = 0;
-    visitados.push_back(s); // C
-    fila.push_back(s); // Q
-    cout << nivel << ": " << s << "\n";
-    while (fila.size() != 0) {
-        vector<int> encontrados_no_nivel;
-        int v = fila.front();
-        fila.pop_front();
-        auto vizinhos_de_v = vizinhos(v);
-        for (auto& vizinho: vizinhos_de_v) {
-            if ( find(visitados.begin(), visitados.end(), vizinho) == visitados.end() ) {
-                visitados.push_back(vizinho);
-                fila.push_back(vizinho);
-                encontrados_no_nivel.push_back(vizinho);
-            }
-        }
-        if (encontrados_no_nivel.size() != 0) {
-            nivel++;
-            cout << nivel << ": ";
-        }
-        for (auto& visitado: encontrados_no_nivel) {
-            cout << visitado << ",";
-        }
-        if (encontrados_no_nivel.size() != 0) {
-            cout << "\n";
-        }
-        encontrados_no_nivel.clear();
-    }
-    cout << endl;
+    // printa o fluxo encontrado por fordFulkerson com EdmondsKarp
+    cout << "-- Algoritmo de Edmonds Karp --\n";
+    int fluxo = ford_fulkerson(fonte, sorvedouro);
+    cout << "Fluxo máximo encontrado: " << fluxo << endl;
 }
 
-void Grafo::floyd_warshall()
+int Grafo::ford_fulkerson(int s, int t)
 {
-    cout << "Algoritmo de floyd-warshall\n";
-    int num_vertices = vertices.size();
-    vector<vector<int>> distancias(num_vertices, vector<int>(num_vertices, INFINITO));
+    int fluxo_maximo = 0;
+    int fluxo_aumentante;
 
-    for (int i = 0; i < num_vertices; i++) {
-        distancias[i][i] = 0;
+    vector<vector<int>> capacidade_residual;
+    capacidade_residual.resize(qtdVertices(), std::vector<int>(qtdVertices(), 0));
+        // cria uma rede(grafo) residual com os arcos invertidos zerados
+    // Grafo rede_residual = *this;
+    for (auto *arco : this->arestas) {
+        int u = arco->vertice1;
+        int v = arco->vertice2;
+        capacidade_residual[u-1][v-1] = arco->peso;
     }
 
-    for (auto& aresta : arestas) {
-        int u = aresta->vertice1;
-        int v = aresta->vertice2;
-        int peso_entre_u_ate_v = aresta->peso;
-        distancias[u-1][v-1] = peso_entre_u_ate_v;
-        distancias[v-1][u-1] = peso_entre_u_ate_v; // grafo não direcionado
+
+    while ((fluxo_aumentante = edmonds_karp(s, t, capacidade_residual)) > 0) {
+        fluxo_maximo += fluxo_aumentante;
+        cout << "fluxo aumentante " << fluxo_aumentante << endl;
     }
 
-    for (int k = 0; k < num_vertices; k++) {
-        for (int i = 0; i < num_vertices; i++) {
-            for (int j = 0; j < num_vertices; j++) {
-                if (distancias[i][k] != INFINITO &&  distancias[k][j] != INFINITO &&
-                    ( distancias[i][k] + distancias[k][j]) < distancias[i][j] ) {
-                    distancias[i][j] = distancias[i][k] + distancias[k][j];
-                }
-            }
-        }
-    }
-
-    // Imprimir as distâncias
-    for (int i = 0; i < num_vertices; i++) {
-        cout << i+1 << ":";
-        for (int j = 0; j < num_vertices; j++) {
-            if (distancias[i][j] == INFINITO) {
-                cout << "Infinito";
-            } else {
-                cout << distancias[i][j] << ",";
-            }
-        }
-        cout << endl;
-    }
-}
-
-void Grafo::dijkstra(int s)
-{
-    cout << "Algoritmo de dijkstra\n";
-    vector<int> visitados(vertices.size(), -1);
-    vector<int> distancia(vertices.size(), INFINITO);
-    vector<int> predecessores(vertices.size(), 0);
-    distancia[s-1] = 0;
-
-    for (auto& vertice: vertices) {
-        int u = encontrarDistanciaMinima(distancia, visitados) + 1;
-        visitados[u-1] = 1;
-        vector<int> vizinhos_de_u = vizinhos(u);
-
-        // pega um vizinho de u
-        for (auto& v: vizinhos_de_u) {
-            if (visitados[v-1] == -1 && haAresta(u, v)) {
-                int peso_de_u_ate_v = peso(u, v);
-                if (distancia[u-1] != INFINITO && distancia[u-1] + peso_de_u_ate_v < distancia[v-1]) {
-                    distancia[v-1] = distancia[u-1] + peso_de_u_ate_v;
-                    predecessores[v-1] = u;
-                }
-            }
-        }
-    }
-    // Imprimir os caminhos 
-    map<int, vector<int>> caminhos;
-    for (int dest = 0; dest < vertices.size(); dest++) {
-        deque<int> caminho; // caminho ate o destino atual da iteração
-        int atual = dest;
-        while (atual != -1)
-        {
-            caminho.push_front(atual+1);
-            int& front = (predecessores[atual]);
-            atual = front-1;
-        }
-        cout << (dest+1) << ": ";
-        for (int v: caminho) {
-            cout << v << ",";
-        }
-        cout << " d: " << distancia[dest] << "\n";
-    }
-    cout << endl;
-}
-
-int Grafo::encontrarDistanciaMinima(vector<int>& distancia, vector<int>& visitados)
-{
-    int minimo = INFINITO;
-    int indice_minimo = -1;
-
-    for (int i = 0; i < vertices.size(); i++) {
-        if (visitados[i] == -1 && distancia[i] <= minimo) {
-            minimo = distancia[i];
-            indice_minimo = i;
-        }
-    }
-    return indice_minimo;
+    return fluxo_maximo; // fluxo maximo encontrado
 }
 
 
-void Grafo::edmonds_karp(int s, int t, Grafo rede_residual) {
+int Grafo::edmonds_karp(int s, int t, vector<vector<int>> &capacidade_residual) {
     //s: source/origem
     //t: sorvedouro ou sink
-    cout << "-- Algoritmo de Edmonds Karp --\n";
+
     deque<int> fila; // C
     vector<int> visitados; // Q
     vector<int> predecessores(vertices.size(), 0); // A
@@ -322,7 +218,7 @@ void Grafo::edmonds_karp(int s, int t, Grafo rede_residual) {
 
         auto vizinhos_de_u = vizinhos(u);
         for (auto& v: vizinhos_de_u) {
-            if ((find(visitados.begin(), visitados.end(), v) == visitados.end()) && (rede_residual.peso(u, v) > 0)) {
+            if ((find(visitados.begin(), visitados.end(), v) == visitados.end()) && (capacidade_residual[u-1][v-1] > 0)) {
                 visitados.push_back(v);
                 predecessores[v-1] = u;
 
@@ -333,17 +229,56 @@ void Grafo::edmonds_karp(int s, int t, Grafo rede_residual) {
                     int w = t;
 
                     while (w != s) {
-                        w = predecessores[w-1];
-                        capacidadeAumentante = min(capacidadeAumentante, rede_residual.peso(u, w));
+                        int u = predecessores[w-1];
+                        capacidadeAumentante = min(capacidadeAumentante, capacidade_residual[u-1][w-1]);
                         p.push_front(w);
+                        w = u;
                     }
-                    fluxo += capacidadeAumentante;
-                    break;
+                    w = t;
+
+                    while (w != s) {
+                        int u = predecessores[w-1];
+                        capacidade_residual[u-1][w-1] -= capacidadeAumentante;
+                        capacidade_residual[w-1][u-1] += capacidadeAumentante;
+                        w = u;
+                    }
+                    return capacidadeAumentante;
                 }
                 fila.push_back(v);
             }
         }
     }
-    cout << "fluxo maximo: " << fluxo << endl;
 
 }
+
+// void Grafo::hopcroft_karp() {
+//     GrafoBipartido grafo_bipartido;
+
+//     // biparte o grafo
+//     for (int i = 0; i < qtdVertices(); i++) {
+//         if (i < qtdVertices()/2)
+//             grafo_bipartido.verticesV.push_back(vertices[i]);
+//         else
+//             grafo_bipartido.verticesU.push_back(vertices[i]);
+//     }
+
+//     for (int j = 0; j < qtdVertices(); j++) {
+//         try
+//         {
+//             cout << "vertices v" << grafo_bipartido.verticesV[j].first << "\n ";
+//         }
+//         catch(const std::exception& e)
+//         {
+//             cout << "vertices u" << grafo_bipartido.verticesU[j].first << "\n "; 
+//             std::cerr << e.what() << '\n';
+//         }
+        
+//     }
+//     int emparelhamento = 0;
+// }
+
+// void Grafo::coloracao() {
+//     vector<int> coloracao_vertices;
+//     coloracao_vertices.resize(qtdVertices(), 0); // cor para cada vertice
+
+// }

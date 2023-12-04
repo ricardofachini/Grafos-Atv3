@@ -32,23 +32,13 @@ class Grafo
         int peso(int u, int v);
 
         // algoritmos:
-        // item 2:
-        void buscaLargura(int origem);
-
-        // item 4
-        void dijkstra(int origem);
-        int encontrarDistanciaMinima(std::vector<int>& distancia, std::vector<int>& visitados);
-
-        // item 5
-        void floyd_warshall();
-
 
         // ATIVIDADE 3:
         // item 1
-        void edmonds_karp(int s, int t, Grafo rede_residual);
+        void item_1(int fonte, int sorvedouro);
+        int ford_fulkerson(int s, int t);
+        int edmonds_karp(int s, int t, std::vector<std::vector<int>> &rede_residual);
 
-        // item 2
-        void hopcroft_karp();
 
         // item 3
         void coloracao();
@@ -57,6 +47,18 @@ class Grafo
         std::vector<std::pair<int, std::string>> vertices; // vetor de pares <indice, rotulo>
         std::vector<Aresta*> arestas; // vetor de ponteiros para arestas
 
+};
+
+class GrafoBipartido {
+    public:
+        GrafoBipartido();
+        //~GrafoBipartido();
+        std::vector<std::pair<int, std::string>> verticesU; // Vértices do conjunto U
+        std::vector<std::pair<int, std::string>> verticesV; // Vértices do conjunto V
+        std::vector<Aresta*> arestas; // Arestas que conectam U a V
+
+        // item 2
+        void hopcroft_karp();
 };
 #endif
 
