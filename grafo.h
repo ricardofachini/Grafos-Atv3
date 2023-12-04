@@ -39,6 +39,11 @@ class Grafo
         int ford_fulkerson(int s, int t);
         int edmonds_karp(int s, int t, std::vector<std::vector<int>> &rede_residual);
 
+        // item 2
+        void hopcroft_karp();
+        bool BFS(std::vector<int>& paresU, const std::vector<int>& paresV, std::vector<int>& distancias);
+        bool DFS(int u, std::vector<int>& paresU, std::vector<int>& paresV, const std::vector<int>& distancias);
+        int dist(int u) const;
 
         // item 3
         void coloracao();
@@ -47,18 +52,21 @@ class Grafo
         std::vector<std::pair<int, std::string>> vertices; // vetor de pares <indice, rotulo>
         std::vector<Aresta*> arestas; // vetor de ponteiros para arestas
 
+        // SOMENTE PARA GRAFOS BIPARTIDOS:
+        std::vector<std::pair<int, std::string>> verticesU; // Vértices do conjunto U
+        std::vector<std::pair<int, std::string>> verticesV; // Vértices do conjunto V
+
+
 };
 
 class GrafoBipartido {
     public:
-        GrafoBipartido();
+        //GrafoBipartido();
         //~GrafoBipartido();
         std::vector<std::pair<int, std::string>> verticesU; // Vértices do conjunto U
         std::vector<std::pair<int, std::string>> verticesV; // Vértices do conjunto V
         std::vector<Aresta*> arestas; // Arestas que conectam U a V
 
-        // item 2
-        void hopcroft_karp();
 };
 #endif
 

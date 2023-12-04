@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <iostream>
 #include <limits>
+#include <unordered_set>
 #include <bits/stdc++.h>
 
 using namespace std;
@@ -50,7 +51,14 @@ Grafo::Grafo(char *nome_arquivo)
                 while (getline(ss, s, ' ')) {
                     v.push_back(s);
                 }
-                pair<int, string> vertice( stoi(v[0]), v[1]);  
+                pair<int, string> vertice;
+                if (v.size() > 1) {
+                    vertice.first = stoi(v[0]);
+                    vertice.second = v[1]; 
+                } else {
+                    vertice.first = stoi(v[0]);
+                    vertice.second = v[0];
+                }
                 vertices.push_back(vertice);
             }
 
@@ -182,23 +190,19 @@ int Grafo::ford_fulkerson(int s, int t)
 
     vector<vector<int>> capacidade_residual;
     capacidade_residual.resize(qtdVertices(), std::vector<int>(qtdVertices(), 0));
-        // cria uma rede(grafo) residual com os arcos invertidos zerados
-    // Grafo rede_residual = *this;
+    // cria uma rede(grafo) residual com os arcos invertidos zerados
     for (auto *arco : this->arestas) {
         int u = arco->vertice1;
         int v = arco->vertice2;
         capacidade_residual[u-1][v-1] = arco->peso;
     }
 
-
     while ((fluxo_aumentante = edmonds_karp(s, t, capacidade_residual)) > 0) {
         fluxo_maximo += fluxo_aumentante;
         cout << "fluxo aumentante " << fluxo_aumentante << endl;
     }
-
     return fluxo_maximo; // fluxo maximo encontrado
 }
-
 
 int Grafo::edmonds_karp(int s, int t, vector<vector<int>> &capacidade_residual) {
     //s: source/origem
@@ -248,37 +252,137 @@ int Grafo::edmonds_karp(int s, int t, vector<vector<int>> &capacidade_residual) 
             }
         }
     }
+}
+
+
+bool Grafo::BFS(std::vector<int>& paresU, const std::vector<int>& paresV, std::vector<int>& distancias) {
+        std::queue<int> fila;
+
+        // Inicializa distâncias para vértices em U não emparelhados
+        for (long unsigned int u = 0; u < verticesU.size(); ++u) {
+            if (paresU[u] == -1) {
+                distancias[u] = 0;
+                fila.push(u);
+            }
+        }
+
+        // Executa busca em largura
+        while (!fila.empty()) {
+            int u = fila.front();
+            fila.pop();
+
+            for (const auto& aresta : arestas) {
+                if (aresta->vertice1 == u) {
+                    int v = aresta->vertice2;
+                    if (paresV[v] == -1) {
+                        return true; // Caminho aumentante encontrado
+                    } else if (distancias[paresV[v]] == std::numeric_limits<int>::max()) {
+                        distancias[paresV[v]] = distancias[u] + 1;
+                        fila.push(paresV[v]);
+                    }
+                }
+            }
+        }
+
+        return false;
+
+    }
+
+bool Grafo::DFS(int u, std::vector<int>& paresU, std::vector<int>& paresV, const std::vector<int>& distancias) {
+        if (u != -1) {
+            if (u != -1) {
+            for (const auto& aresta : arestas) {
+                if (aresta->vertice1 == u) {
+                    int v = aresta->vertice2;
+                    if (paresV[v] == -1 || (distancias[paresV[v]] == distancias[u] + 1 && DFS(paresV[v], paresU, paresV, distancias))) {
+                        paresU[u] = v;
+                        paresV[v] = u;
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+        return true;
+    }
+}
+
+
+int Grafo::dist(int u) const {
+    return (u == -1) ? std::numeric_limits<int>::max() : 0;
+}
+
+void Grafo::hopcroft_karp() {
+
+    //separa os vertices em U e V
+    for (int i = 0; i < qtdVertices(); i++ ) {
+        if (i < qtdVertices()/2) {
+            verticesU.push_back(vertices[i]);
+        } else {
+            verticesV.push_back(vertices[i]);
+        }
+    }
+
+    vector<int> distancias(verticesU.size(), std::numeric_limits<int>::max()); // Distâncias para busca em largura
+    vector<int> paresU(verticesU.size(), -1); // Pares dos vértices em U
+    vector<int> paresV(verticesV.size(), -1); // Pares dos vértices em V
+    int tamanhoEmparelhamento = 0;
+
+    int resultado = 0;
+
+    while (BFS(paresU, paresV, distancias)) {
+        // Para cada vértice em U
+        for (long unsigned int u = 0; u < verticesU.size(); ++u) {
+            // Se o vértice ainda não foi emparelhado
+            if (paresU[u] == -1) {
+                // Se encontrar caminho aumentante a partir desse vértice
+                if (DFS(u, paresU, paresV, distancias)) {
+                    ++tamanhoEmparelhamento;
+                }
+            }
+        }
+    }
+
+    cout << "emparelhamento: " << tamanhoEmparelhamento << "\n";
 
 }
 
-// void Grafo::hopcroft_karp() {
-//     GrafoBipartido grafo_bipartido;
+void Grafo::coloracao() {
+    vector<vector<int>> adjacencias; // Lista de adjacências
+    adjacencias.resize(qtdVertices());
+    vector<int> cores(adjacencias.size(), -1); // Vetor de cores
+    int numero_cromatico = 0;
 
-//     // biparte o grafo
-//     for (int i = 0; i < qtdVertices(); i++) {
-//         if (i < qtdVertices()/2)
-//             grafo_bipartido.verticesV.push_back(vertices[i]);
-//         else
-//             grafo_bipartido.verticesU.push_back(vertices[i]);
-//     }
+    for (auto& aresta: arestas) {
+        int u = aresta->vertice1;
+        int v = aresta->vertice2;
+        adjacencias[u-1].push_back(v-1);
+        adjacencias[v-1].push_back(u-1);
+    }
 
-//     for (int j = 0; j < qtdVertices(); j++) {
-//         try
-//         {
-//             cout << "vertices v" << grafo_bipartido.verticesV[j].first << "\n ";
-//         }
-//         catch(const std::exception& e)
-//         {
-//             cout << "vertices u" << grafo_bipartido.verticesU[j].first << "\n "; 
-//             std::cerr << e.what() << '\n';
-//         }
-        
-//     }
-//     int emparelhamento = 0;
-// }
+    for (long unsigned int vertice = 0; vertice < adjacencias.size(); ++vertice) {
+        unordered_set<int> coresAdjacentes;
 
-// void Grafo::coloracao() {
-//     vector<int> coloracao_vertices;
-//     coloracao_vertices.resize(qtdVertices(), 0); // cor para cada vertice
+        // Verifica cores dos vértices adjacentes
+        for (int adjacente : adjacencias[vertice]) {
+            if (cores[adjacente] != -1) {
+                coresAdjacentes.insert(cores[adjacente]);
+            }
+        }
 
-// }
+        // Atribui a menor cor disponível ao vértice
+        int cor = 0;
+        while (coresAdjacentes.count(cor) > 0) {
+            ++cor;
+        }
+
+        cores[vertice] = cor;
+        numero_cromatico = max(numero_cromatico, cor + 1);
+    }
+
+    // Imprime a coloração mínima e o número cromático de cada vértice
+    cout << "Coloração minima: " << numero_cromatico << endl;
+    for (long unsigned int i = 0; i < adjacencias.size(); ++i) {
+        cout << "Vértice " << i+1 << ": Cor " << cores[i]+1 << endl;
+    }
+}
